@@ -1,0 +1,50 @@
+version: '3'
+services:
+  nginx:
+    image: nginx
+    links:
+      - phalcon7
+    volumes:
+      - ./conf.d:/etc/nginx/conf.d
+      - ./www:/www
+    ports:
+      - "88:80"
+    command: nginx -g "daemon off;"
+  
+  phalcon7:
+    image: php-fpm-phalcon7
+    build: .
+    # links:
+      # - pdb
+      # - predis
+    ports:
+      - "9000"
+    volumes:
+      - ./www:/www
+      - ./cphalcon7/devtools:/devtools
+      - ./php-fpm.d/www.conf:/usr/local/etc/php-fpm.d/www.conf
+    command: 
+      - /bin/sh
+      - -c
+      - |
+        ln -s /devtools/phalcon.php /usr/bin/phalcon 
+        chmod ugo+x /usr/bin/phalcon 
+        php-fpm -F
+
+  # pdb:
+  #   image: mysql:5.7
+  #   volumes:
+  #     - ./dbdata:/var/lib/mysql:rw
+  #   environment:
+  #     MYSQL_DATABASE: db
+  #     MYSQL_USER: root
+  #     MYSQL_ROOT_PASSWORD: 123456
+  
+  # predis:
+  #   image: redis:5.0
+  #   ports:
+  #     - "7403"
+  #   volumes:
+  #     - ./redis:/data:rw
+  #     - ./redis/redis.conf:/etc/redis/redis.conf
+  #   command: redis-server /etc/redis/redis.conf
